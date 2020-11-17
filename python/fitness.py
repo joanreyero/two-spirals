@@ -3,7 +3,7 @@ import time
 
 
 def build_url(hlhu, algorithm, activation, inputs):
-    return f'http://localhost:5000/#activation={activation}&batchSize=10&dataset=spiral&regDataset=reg-plane&learningRate=0.03&regularizationRate=0&noise=20&networkShape={hlhu}&seed=0.41030&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=false&xSquared={inputs}&ySquared={inputs}&cosX=false&sinX=true&cosY=false&sinY=true&collectStats=false&problem=classification&algorithm={algorithm}&initZero=false&hideText=false'
+    return f'http://localhost:5000/#activation={activation}&batchSize=10&dataset=spiral&regDataset=reg-plane&learningRate=0.03&regularizationRate=0&noise=0&networkShape={hlhu}&seed=0.41030&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=false&xSquared={inputs}&ySquared={inputs}&cosX=false&sinX=true&cosY=false&sinY=true&collectStats=false&problem=classification&algorithm={algorithm}&initZero=false&hideText=false'
 
 
 def parse_hlhu(hlhu):
@@ -42,7 +42,7 @@ def get_fitness(params):
 
     
     url = build_url(hlhu, algorithm, activation, inputs)
-    driver = webdriver.Chrome('/Users/joanreyero/chromedriver')  # Optional argument, if not specified will search path.
+    driver = webdriver.Chrome('/Users/joanreyero/chromedriver')  
     driver.get(url)
     time.sleep(0.2)
     button = driver.find_element_by_id('play-pause-button')
@@ -58,7 +58,7 @@ def get_fitness(params):
             print(testloss)
             break
 
-        if epoch_num > 50 and not checked_ok:
+        if epoch_num > 20 and not checked_ok:
             testloss = driver.find_element_by_id('loss-test').text
             if float(testloss) > 0.4:
                 break

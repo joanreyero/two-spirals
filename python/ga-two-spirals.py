@@ -31,9 +31,9 @@ Activations: (each corresponds to an element of the list, in order)
 """
 
 varbound_ga = np.array([
-    [0, 3],  # HL 1
-    [0, 3],  # HL 2
-    [0, 0],  # HL 3
+    [0, 8],  # HL 1
+    [0, 8],  # HL 2
+    [0, 8],  # HL 3
     [0, 0],  # Not HL4
     [1, 1],  # PSO
     [1, 1],  # TanH
