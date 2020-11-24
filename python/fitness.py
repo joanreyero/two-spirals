@@ -35,19 +35,19 @@ def parse_inputs(marker):
         return 'true'
     return 'false'
 
-def get_fitness(params, max_epochs=100, sanity_check=30, checked_ok=False, repeat=5):
+def get_fitness(params, max_epochs=100, sanity_check=30, checked_ok=False, repeat=3):
     """
     Input: list of 7 elements
     """
 
-    np.random.seed(424242)
+    rng = np.random.RandomState(seed=424242)
     hlhu = parse_hlhu(params[:6])
     algorithm = parse_algorithm(params[6])
     activation = parse_activation(params[7])
     inputs = parse_inputs(params[8])
     loses = []
     for i in range(repeat):
-        seed = np.random.rand()
+        seed = rng.rand()
         url = build_url(hlhu, algorithm, activation, inputs, seed=seed)
         driver = webdriver.Chrome('/Users/joanreyero/chromedriver')  
         driver.get(url)
@@ -62,7 +62,6 @@ def get_fitness(params, max_epochs=100, sanity_check=30, checked_ok=False, repea
             if epoch_num > max_epochs:
                 testloss = driver.find_element_by_id('loss-test').text
                 loses.append(float(testloss))
-                print(testloss)                
                 break
 
             if epoch_num > sanity_check and not checked_ok:
@@ -70,12 +69,12 @@ def get_fitness(params, max_epochs=100, sanity_check=30, checked_ok=False, repea
                 if float(testloss) > 0.4:
                     testloss = driver.find_element_by_id('loss-test').text
                     loses.append(float(testloss))
-                    print(testloss)                
                     break
                 else: checked_ok = True
 
 
         driver.quit()
+    print(f'Finished {hlhu} with {np.mean(loses)}')
     return np.mean(loses)
 
 
