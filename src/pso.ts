@@ -1,5 +1,5 @@
 /* A simple PSO algorithm and the interaction with the NN via the fitness function */
-const OMEGA = 0.2;
+const OMEGA = 0.1;
 const ALPHA1 = 2.0;
 const ALPHA2 = 2.0;
 const SWRMSZ = 400;

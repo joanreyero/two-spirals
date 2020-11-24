@@ -1,9 +1,14 @@
 from selenium import webdriver
 import time
+import numpy as np
 
 
-def build_url(hlhu, algorithm, activation, inputs):
-    return f'http://localhost:5000/#activation={activation}&batchSize=10&dataset=spiral&regDataset=reg-plane&learningRate=0.03&regularizationRate=0&noise=0&networkShape={hlhu}&seed=0.41030&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=false&xSquared={inputs}&ySquared={inputs}&cosX=false&sinX=true&cosY=false&sinY=true&collectStats=false&problem=classification&algorithm={algorithm}&initZero=false&hideText=false'
+def build_url(hlhu, algorithm, activation, inputs, seed=False):
+    if not seed:
+        seed = str(0.41030)
+    else:
+        seed = str(seed)
+    return f'http://localhost:5000/#activation={activation}&batchSize=10&dataset=spiral&regDataset=reg-plane&learningRate=0.03&regularizationRate=0&noise=0&networkShape={hlhu}&seed={seed}&showTestData=false&discretize=true&percTrainData=50&x=true&y=true&xTimesY=false&xSquared={inputs}&ySquared={inputs}&cosX=false&sinX=true&cosY=false&sinY=true&collectStats=true&problem=classification&algorithm={algorithm}&initZero=false&hideText=false'
 
 
 def parse_hlhu(hlhu):
@@ -30,51 +35,64 @@ def parse_inputs(marker):
         return 'true'
     return 'false'
 
-def get_fitness(params):
+def get_fitness(params, max_epochs=100, sanity_check=30, checked_ok=False, repeat=5):
     """
     Input: list of 7 elements
     """
 
-    hlhu = parse_hlhu(params[:4])
-    algorithm = parse_algorithm(params[4])
-    activation = parse_activation(params[5])
-    inputs = parse_inputs(params[6])
+    np.random.seed(424242)
+    hlhu = parse_hlhu(params[:6])
+    algorithm = parse_algorithm(params[6])
+    activation = parse_activation(params[7])
+    inputs = parse_inputs(params[8])
+    loses = []
+    for i in range(repeat):
+        seed = np.random.rand()
+        url = build_url(hlhu, algorithm, activation, inputs, seed=seed)
+        driver = webdriver.Chrome('/Users/joanreyero/chromedriver')  
+        driver.get(url)
+        time.sleep(0.2)
+        button = driver.find_element_by_id('play-pause-button')
+        button.click()
 
-    
-    url = build_url(hlhu, algorithm, activation, inputs)
-    driver = webdriver.Chrome('/Users/joanreyero/chromedriver')  
-    driver.get(url)
-    time.sleep(0.2)
-    button = driver.find_element_by_id('play-pause-button')
-    button.click()
-    checked_ok = False
+        while True:
+            epoch_num = driver.find_element_by_id('iter-number').text
+            epoch_num = int(epoch_num.replace(',', ''))
 
-    while True:
-        epoch_num = driver.find_element_by_id('iter-number').text
-        epoch_num = int(epoch_num.replace(',', ''))
-
-        if epoch_num > 100:
-            testloss = driver.find_element_by_id('loss-test').text
-            print(testloss)
-            break
-
-        if epoch_num > 20 and not checked_ok:
-            testloss = driver.find_element_by_id('loss-test').text
-            if float(testloss) > 0.4:
+            if epoch_num > max_epochs:
+                testloss = driver.find_element_by_id('loss-test').text
+                loses.append(float(testloss))
+                print(testloss)                
                 break
-            else: checked_ok = True
 
-    driver.quit()
-    return float(testloss)
+            if epoch_num > sanity_check and not checked_ok:
+                testloss = driver.find_element_by_id('loss-test').text
+                if float(testloss) > 0.4:
+                    testloss = driver.find_element_by_id('loss-test').text
+                    loses.append(float(testloss))
+                    print(testloss)                
+                    break
+                else: checked_ok = True
+
+
+        driver.quit()
+    return np.mean(loses)
 
 
 
 
 
 if __name__ == '__main__':
-    get_fitness([
-        3, 3, 3, 0,  # hlhu
-        1,  # algorithm
-        0,  # activation
-        1,  # show X**2
-    ])
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-g','--genome', nargs='+', type=int,
+                        help='genome', required=True)
+    parser.add_argument('--max_epochs', '-m', type=int, default=1000,
+                        help='max epochs')
+    parser.add_argument('--times', '-t', type=int, default=5,
+                        help="Times to run the PSO")
+    args = parser.parse_args()
+
+    r = get_fitness(args.genome, max_epochs=args.max_epochs, checked_ok=True)
+
+    print(results)
