@@ -3,12 +3,12 @@ import time
 import numpy as np
 
 
-def build_url(hlhu, algorithm, activation, inputs, seed=False):
+def build_url(hlhu, algorithm, activation, inputs, seed=False, noise='0', reg='0'):
     if not seed:
         seed = str(0.41030)
     else:
         seed = str(seed)
-    return f'http://localhost:5000/#activation={activation}&batchSize=10&dataset=spiral&regDataset=reg-plane&learningRate=0.03&regularizationRate=0&noise=0&networkShape={hlhu}&seed={seed}&showTestData=false&discretize=true&percTrainData=50&x=true&y=true&xTimesY=false&xSquared={inputs}&ySquared={inputs}&cosX=false&sinX=true&cosY=false&sinY=true&collectStats=true&problem=classification&algorithm={algorithm}&initZero=false&hideText=false'
+    return f'http://localhost:5000/#activation={activation}&regularization=L2&batchSize=10&dataset=spiral&regDataset=reg-plane&learningRate=0.03&regularizationRate={reg}&noise={noise}&networkShape={hlhu}&seed={seed}&showTestData=false&discretize=true&percTrainData=50&x=true&y=true&xTimesY=false&xSquared={inputs}&ySquared={inputs}&cosX=false&sinX=true&cosY=false&sinY=true&collectStats=true&problem=classification&algorithm={algorithm}&initZero=false&hideText=false'
 
 
 def parse_hlhu(hlhu):
@@ -35,7 +35,7 @@ def parse_inputs(marker):
         return 'true'
     return 'false'
 
-def get_fitness(params, max_epochs=100, sanity_check=30, checked_ok=False, repeat=3):
+def get_fitness(params, max_epochs=300, sanity_check=100, checked_ok=False, repeat=1, report=False, noise='0', reg='0'):
     """
     Input: list of 7 elements
     """
@@ -48,7 +48,7 @@ def get_fitness(params, max_epochs=100, sanity_check=30, checked_ok=False, repea
     loses = []
     for i in range(repeat):
         seed = rng.rand()
-        url = build_url(hlhu, algorithm, activation, inputs, seed=seed)
+        url = build_url(hlhu, algorithm, activation, inputs, seed=seed, noise=noise, reg=reg)
         driver = webdriver.Chrome('/Users/joanreyero/chromedriver')  
         driver.get(url)
         time.sleep(0.2)
@@ -75,6 +75,9 @@ def get_fitness(params, max_epochs=100, sanity_check=30, checked_ok=False, repea
 
         driver.quit()
     print(f'Finished {hlhu} with {np.mean(loses)}')
+
+    if report:
+        return np.mean(loses), np.std(loses)
     return np.mean(loses)
 
 
@@ -88,10 +91,14 @@ if __name__ == '__main__':
                         help='genome', required=True)
     parser.add_argument('--max_epochs', '-m', type=int, default=1000,
                         help='max epochs')
-    parser.add_argument('--times', '-t', type=int, default=5,
+    parser.add_argument('--repeat', '-r', type=int, default=5,
                         help="Times to run the PSO")
+    parser.add_argument('--noise', '-n', type=str, default='0',
+                        help='noise')
+    parser.add_argument('--reg', type=str, default='0',
+                        help='regularisation')
     args = parser.parse_args()
 
-    r = get_fitness(args.genome, max_epochs=args.max_epochs, checked_ok=True)
+    r = get_fitness(args.genome, max_epochs=args.max_epochs, checked_ok=True, repeat=args.repeat, report=True, noise=args.noise, reg=args.reg)
 
-    print(results)
+    print(r)

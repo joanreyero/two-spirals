@@ -43,12 +43,12 @@ varbound_ga = np.array([
 ])
 
 varbound_gp = np.array([
-    [0, 3],  # HL 1
-    [0, 3],  # HL 2
-    [0, 3],  # HL 3
-    [0, 3],  # TODO Not HL4
-    [0, 3],
-    [0, 3],
+    [6, 6],  # HL 1
+    [0, 0],  # HL 2
+    [0, 0],  # HL 3
+    [0, 0],  # TODO Not HL4
+    [0, 0],
+    [0, 0],
     [0, 1],  # PSO
     [0, 4],  # TanH
     [0, 1],  # No x**2
