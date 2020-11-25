@@ -34,9 +34,9 @@ varbound_ga = np.array([
     [0, 8],  # HL 1
     [0, 8],  # HL 2
     [0, 8],  # HL 3
-    [0, 0],  # TODO Not HL4
-    [0, 0],  # TODO Not HL4
-    [0, 0],  # TODO Not HL4
+    [0, 0],  # HL 4
+    [0, 0],  # HL 5
+    [0, 0],  # HL 6
     [1, 1],  # PSO
     [1, 1],  # TanH
     [0, 0],  # No x**2
@@ -46,12 +46,12 @@ varbound_gp = np.array([
     [6, 6],  # HL 1
     [0, 0],  # HL 2
     [0, 0],  # HL 3
-    [0, 0],  # TODO Not HL4
-    [0, 0],
-    [0, 0],
-    [0, 1],  # PSO
-    [0, 4],  # TanH
-    [0, 1],  # No x**2
+    [0, 0],  # HL 4
+    [0, 0],  # HL 5
+    [0, 0],  # HL 6
+    [0, 1],  # PSO or SGD
+    [0, 4],  # 0: ReLU, 1: TanH, 2: Sigmoid, 3: Sin, 4: RBF
+    [0, 1],  # x**2 or not
 ])
 
 

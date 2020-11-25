@@ -1,7 +1,7 @@
 from selenium import webdriver
 import time
 import numpy as np
-
+from config import *
 
 def build_url(hlhu, algorithm, activation, inputs, seed=False, noise='0', reg='0'):
     if not seed:
@@ -49,7 +49,7 @@ def get_fitness(params, max_epochs=300, sanity_check=100, checked_ok=False, repe
     for i in range(repeat):
         seed = rng.rand()
         url = build_url(hlhu, algorithm, activation, inputs, seed=seed, noise=noise, reg=reg)
-        driver = webdriver.Chrome('/Users/joanreyero/chromedriver')  
+        driver = webdriver.Chrome(PATH_TO_DRIVER)  
         driver.get(url)
         time.sleep(0.2)
         button = driver.find_element_by_id('play-pause-button')
@@ -74,7 +74,6 @@ def get_fitness(params, max_epochs=300, sanity_check=100, checked_ok=False, repe
 
 
         driver.quit()
-    print(f'Finished {hlhu} with {np.mean(loses)}')
 
     if report:
         return np.mean(loses), np.std(loses)
@@ -99,6 +98,8 @@ if __name__ == '__main__':
                         help='regularisation')
     args = parser.parse_args()
 
-    r = get_fitness(args.genome, max_epochs=args.max_epochs, checked_ok=True, repeat=args.repeat, report=True, noise=args.noise, reg=args.reg)
+    r = get_fitness(args.genome, max_epochs=args.max_epochs, 
+                    checked_ok=True, repeat=args.repeat, 
+                    report=True, noise=args.noise, reg=args.reg)
 
     print(r)
